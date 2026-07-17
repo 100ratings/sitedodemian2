@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 /**
  * DOUBLE TAP UNLOCK
  * Detecta 2 toques rápidos em "Demian Max" para destravar a carta
- * e mostra um ponto (•) como indicador visual
+ * e mostra um ponto (.) após "O Artista"
  */
 function initDoubleTapUnlock() {
     const demianLink = document.getElementById('demian-unlock');
@@ -49,14 +49,25 @@ function initDoubleTapUnlock() {
     const doubleTapDelay = 300; // 300ms entre toques
 
     demianLink.addEventListener('click', (e) => {
+        // Impede que o link arraste a página para cima ou mude a URL visualmente
         e.preventDefault();
-        const now = Date.now();
         
+        const now = Date.now();
         if (now - lastTap < doubleTapDelay) {
             // Double tap detectado!
-            window.location.hash = '#unlock';
-            unlockIndicator.style.display = 'inline';
-            console.log("🔓 Dispositivo destravado! Ponto (•) apareceu.");
+            
+            // Ativa o destravamento sem mudar o scroll da página
+            if (window.location.hash !== '#unlock') {
+                history.replaceState(null, null, '#unlock');
+                // Dispara o evento de mudança de hash para o script mwfx.js detectar
+                window.dispatchEvent(new HashChangeEvent('hashchange'));
+            }
+            
+            // Mostra o ponto indicador após "O Artista"
+            if (unlockIndicator) {
+                unlockIndicator.style.display = 'inline';
+            }
+            console.log("🔓 Dispositivo destravado! Indicador: O Artista.");
         }
         lastTap = now;
     });
