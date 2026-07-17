@@ -49,25 +49,30 @@ function initDoubleTapUnlock() {
     const doubleTapDelay = 300; // 300ms entre toques
 
     demianLink.addEventListener('click', (e) => {
-        // Impede que o link arraste a página para cima ou mude a URL visualmente
-        e.preventDefault();
-        
         const now = Date.now();
         if (now - lastTap < doubleTapDelay) {
             // Double tap detectado!
             
-            // Ativa o destravamento sem mudar o scroll da página
-            if (window.location.hash !== '#unlock') {
+            // Destravamento via código puro para evitar qualquer movimento de scroll
+            // Isso simula o efeito do link #unlock sem mudar a URL ou a posição da página
+            if (typeof mwfx_unlock === 'function') {
+                mwfx_unlock();
+            } else {
+                // Caso a função global não esteja disponível, usamos o método do hash silencioso
+                const currentHash = window.location.hash;
                 history.replaceState(null, null, '#unlock');
-                // Dispara o evento de mudança de hash para o script mwfx.js detectar
                 window.dispatchEvent(new HashChangeEvent('hashchange'));
+                // Volta o hash original sem disparar novo evento, mantendo a posição
+                setTimeout(() => {
+                    history.replaceState(null, null, currentHash || ' ');
+                }, 10);
             }
             
             // Mostra o ponto indicador após "O Artista"
             if (unlockIndicator) {
                 unlockIndicator.style.display = 'inline';
             }
-            console.log("🔓 Dispositivo destravado! Indicador: O Artista.");
+            console.log("🔓 Dispositivo destravado com sucesso!");
         }
         lastTap = now;
     });
