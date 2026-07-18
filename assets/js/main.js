@@ -33,7 +33,39 @@ document.addEventListener('DOMContentLoaded', () => {
     initDoubleTapUnlock();
     initImageProtection();
     initTripleWakeLock();
+    checkUrlParamsForForm();
 });
+
+/**
+ * VERIFICA PARÂMETROS DA URL PARA PREENCHIMENTO DO FORMULÁRIO
+ * Se a URL contiver ?formato=..., preenche o campo de mensagem
+ */
+function checkUrlParamsForForm() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const formato = urlParams.get('formato');
+    
+    if (formato) {
+        const textarea = document.querySelector('textarea[name="mensagem"]');
+        if (textarea) {
+            textarea.value = `Interesse no formato: ${formato}`;
+            
+            // Scroll suave até o formulário após um pequeno delay para garantir o carregamento
+            setTimeout(() => {
+                const orcamentoSection = document.getElementById('orcamento');
+                if (orcamentoSection) {
+                    const header = document.querySelector('.header');
+                    const headerHeight = header ? header.offsetHeight : 70;
+                    const targetPosition = orcamentoSection.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 500);
+        }
+    }
+}
 
 /**
  * DOUBLE TAP UNLOCK
@@ -42,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function initDoubleTapUnlock() {
     const demianLink = document.getElementById('demian-unlock');
-    const unlockIndicator = document.getElementById('unlock-indicator');
+    // const unlockIndicator = document.getElementById('unlock-indicator');
     if (!demianLink) return;
 
     let lastTap = 0;
@@ -55,8 +87,7 @@ function initDoubleTapUnlock() {
         if (now - lastTap < doubleTapDelay) {
             // Double tap detectado!
             window.location.hash = '#unlock';
-            unlockIndicator.style.display = 'inline';
-            console.log("🔓 Dispositivo destravado! Ponto (•) apareceu.");
+            console.log("🔓 Dispositivo destravado!");
         }
         lastTap = now;
     });
